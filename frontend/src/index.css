@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom animations */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+/* Emoji Picker Styles */
+.emoji-picker-react {
+  @apply bg-white dark:bg-gray-800
+}
+
+.emoji-picker-react .emoji-search {
+  @apply dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:focus:border-sky-500
+}
+
+.emoji-picker-react .emoji-categories {
+  @apply dark:bg-gray-800;
+}
+
+.emoji-picker-react .emoji-scroll-wrapper::-webkit-scrollbar {
+  @apply dark:bg-gray-800 w-5
+}
+
+.emoji-picker-react .emoji-categories button {
+  @apply contrast-0
+}
+
+.emoji-picker-react .emoji-scroll-wrapper .emoji-group::before {
+  @apply dark:bg-gray-800 dark:text-white
+}
+
+/* Custom scrollbar for the entire app */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+@layer base {
+  body {
+    @apply bg-white dark:bg-gray-900 antialiased;
+  }
+}
