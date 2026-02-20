@@ -6,9 +6,9 @@ export default function UserLayout({ user, onlineUsersId }) {
         {user?.displayName}
       </span>
       {onlineUsersId?.includes(user?.uid) ? (
-        <span className="bottom-0 left-7 absolute  w-3.5 h-3.5 bg-green-500 dark:bg-green-400 border-2 border-white rounded-full"></span>
+        <span className="bottom-0 left-7 absolute w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></span>
       ) : (
-        <span className="bottom-0 left-7 absolute  w-3.5 h-3.5 bg-gray-400 border-2 border-white rounded-full"></span>
+        <span className="bottom-0 left-7 absolute w-3.5 h-3.5 bg-gray-400 border-2 border-white dark:border-gray-900 rounded-full"></span>
       )}
     </div>
   );

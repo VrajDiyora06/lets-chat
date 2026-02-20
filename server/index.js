@@ -52,7 +52,8 @@ io.on("connection", (socket) => {
 
   socket.on("addUser", (userId) => {
     onlineUsers.set(userId, socket.id);
-    socket.emit("getUsers", Array.from(onlineUsers));
+    // Broadcast to ALL connected clients so everyone sees updated online status
+    io.emit("getUsers", Array.from(onlineUsers));
   });
 
   socket.on("sendMessage", ({ senderId, receiverId, message }) => {
@@ -65,8 +66,14 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("markMessagesRead", ({ chatRoomId, userId }) => {
+    // Notify the other user that their messages have been read
+    socket.broadcast.emit("messagesRead", { chatRoomId, readBy: userId });
+  });
+
   socket.on("disconnect", () => {
     onlineUsers.delete(getKey(onlineUsers, socket.id));
-    socket.emit("getUsers", Array.from(onlineUsers));
+    // Broadcast to ALL connected clients so everyone sees updated online status
+    io.emit("getUsers", Array.from(onlineUsers));
   });
 });

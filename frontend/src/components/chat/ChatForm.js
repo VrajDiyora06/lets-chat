@@ -31,10 +31,9 @@ export default function ChatForm(props) {
     };
   }, [showEmojiPicker]);
 
-  const handleEmojiClick = (emojiData) => {
-    // emoji-picker-react v4+ uses emojiData.emoji directly
-    const emoji = emojiData.emoji || emojiData;
-    setMessage((prev) => prev + emoji);
+  const handleEmojiClick = (event, emojiObject) => {
+    // emoji-picker-react v3 passes (event, emojiObject)
+    setMessage((prev) => prev + emojiObject.emoji);
     // Keep focus on input after selecting emoji
     inputRef.current?.focus();
   };
@@ -91,8 +90,8 @@ export default function ChatForm(props) {
           >
             <EmojiHappyIcon
               className={`h-7 w-7 transition-colors duration-200 ${showEmojiPicker
-                  ? "text-blue-400 dark:text-blue-400"
-                  : "text-blue-600 dark:text-blue-500"
+                ? "text-blue-400 dark:text-blue-400"
+                : "text-blue-600 dark:text-blue-500"
                 }`}
               aria-hidden="true"
             />

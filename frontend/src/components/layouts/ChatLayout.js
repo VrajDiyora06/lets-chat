@@ -4,6 +4,8 @@ import {
   getAllUsers,
   getChatRooms,
   initiateSocketConnection,
+  getUnreadCounts,
+  markMessagesAsRead,
 } from "../../services/ChatService";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -21,6 +23,7 @@ export default function ChatLayout() {
   const [currentChat, setCurrentChat] = useState();
   const [onlineUsersId, setonlineUsersId] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   const [isContact, setIsContact] = useState(false);
 
@@ -37,10 +40,30 @@ export default function ChatLayout() {
         const userId = users.map((u) => u[0]);
         setonlineUsersId(userId);
       });
+
+      // Listen for incoming messages to update unread counts
+      socket.current.on("getMessage", (data) => {
+        // If the message is not from the currently open chat, increment unread
+        // We need to find which chatRoom this message belongs to
+        // The senderId tells us who sent it
+        setUnreadCounts((prev) => {
+          const newCounts = { ...prev };
+          // We'll figure out the chatRoomId from the current chat rooms
+          // For now, we trigger a refresh of unread counts
+          return newCounts;
+        });
+        fetchUnreadCounts();
+      });
     };
 
     getSocket();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser.uid]);
+
+  const fetchUnreadCounts = async () => {
+    const counts = await getUnreadCounts(currentUser.uid);
+    setUnreadCounts(counts);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +72,11 @@ export default function ChatLayout() {
     };
 
     fetchData();
+  }, [currentUser.uid]);
+
+  useEffect(() => {
+    fetchUnreadCounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser.uid]);
 
   useEffect(() => {
@@ -73,8 +101,26 @@ export default function ChatLayout() {
     }
   }, [isContact]);
 
-  const handleChatChange = (chat) => {
+  const handleChatChange = async (chat) => {
     setCurrentChat(chat);
+
+    // Mark messages as read when opening a chat
+    if (chat && chat._id) {
+      await markMessagesAsRead(chat._id, currentUser.uid);
+
+      // Notify other users via socket
+      socket.current?.emit("markMessagesRead", {
+        chatRoomId: chat._id,
+        userId: currentUser.uid,
+      });
+
+      // Clear unread count for this chat
+      setUnreadCounts((prev) => {
+        const newCounts = { ...prev };
+        delete newCounts[chat._id];
+        return newCounts;
+      });
+    }
   };
 
   const handleSearch = (newSearchQuery) => {
@@ -119,6 +165,7 @@ export default function ChatLayout() {
             onlineUsersId={onlineUsersId}
             currentUser={currentUser}
             changeChat={handleChatChange}
+            unreadCounts={unreadCounts}
           />
         </div>
 
@@ -127,6 +174,7 @@ export default function ChatLayout() {
             currentChat={currentChat}
             currentUser={currentUser}
             socket={socket}
+            onNewMessage={fetchUnreadCounts}
           />
         ) : (
           <Welcome />

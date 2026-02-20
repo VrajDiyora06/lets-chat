@@ -126,3 +126,33 @@ export const sendMessage = async (messageBody) => {
     console.error(e);
   }
 };
+
+export const markMessagesAsRead = async (chatRoomId, userId) => {
+  const header = await createHeader();
+
+  try {
+    const res = await axios.put(
+      `${baseURL}/message/read/${chatRoomId}`,
+      { userId },
+      header
+    );
+    return res.data;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const getUnreadCounts = async (userId) => {
+  const header = await createHeader();
+
+  try {
+    const res = await axios.get(
+      `${baseURL}/message/unread/${userId}`,
+      header
+    );
+    return res.data;
+  } catch (e) {
+    console.error(e);
+    return {};
+  }
+};

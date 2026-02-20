@@ -22,6 +22,7 @@ export const createChatRoom = async (req, res) => {
     await newChatRoom.save();
     res.status(201).json(newChatRoom);
   } catch (error) {
+    console.error("Error in createChatRoom:", error.message);
     res.status(409).json({
       message: error.message,
     });

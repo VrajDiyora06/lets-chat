@@ -1,12 +1,21 @@
 import { useState, useEffect, useRef } from "react";
 
-import { getMessagesOfChatRoom, sendMessage } from "../../services/ChatService";
+import {
+  getMessagesOfChatRoom,
+  sendMessage,
+  markMessagesAsRead,
+} from "../../services/ChatService";
 
 import Message from "./Message";
 import Contact from "./Contact";
 import ChatForm from "./ChatForm";
 
-export default function ChatRoom({ currentChat, currentUser, socket }) {
+export default function ChatRoom({
+  currentChat,
+  currentUser,
+  socket,
+  onNewMessage,
+}) {
   const [messages, setMessages] = useState([]);
   const [incomingMessage, setIncomingMessage] = useState(null);
 
@@ -16,10 +25,13 @@ export default function ChatRoom({ currentChat, currentUser, socket }) {
     const fetchData = async () => {
       const res = await getMessagesOfChatRoom(currentChat._id);
       setMessages(res);
+
+      // Mark messages as read when opening the chat
+      await markMessagesAsRead(currentChat._id, currentUser.uid);
     };
 
     fetchData();
-  }, [currentChat._id]);
+  }, [currentChat._id, currentUser.uid]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({
@@ -37,7 +49,16 @@ export default function ChatRoom({ currentChat, currentUser, socket }) {
   }, [socket]);
 
   useEffect(() => {
-    incomingMessage && setMessages((prev) => [...prev, incomingMessage]);
+    if (incomingMessage) {
+      setMessages((prev) => [...prev, incomingMessage]);
+
+      // Mark the incoming message as read immediately since the user has the chat open
+      markMessagesAsRead(currentChat._id, currentUser.uid);
+
+      // Notify parent to refresh unread counts (for other chats)
+      if (onNewMessage) onNewMessage();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [incomingMessage]);
 
   const handleFormSubmit = async (message) => {
